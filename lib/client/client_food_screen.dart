@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:resident_hotel_app/APIs/api.dart';
+import 'package:resident_hotel_app/controller/FoodAndBeverageController.dart';
 
 class ClientFoodScreen extends StatefulWidget {
   const ClientFoodScreen({super.key});
@@ -8,117 +11,100 @@ class ClientFoodScreen extends StatefulWidget {
 }
 
 class _ClientFoodScreenState extends State<ClientFoodScreen> {
-  // Sample food and beverage data
-  final List<Map<String, dynamic>> foodAndBeverages = [
-    {
-      'category': 'Food',
-      'items': [
-        {
-          'name': 'Pizza',
-          'price': 8.99,
-          'image': 'https://via.placeholder.com/150',
-          'status': 'Available',
-        },
-        {
-          'name': 'Burger',
-          'price': 5.49,
-          'image': 'https://via.placeholder.com/150',
-          'status': 'Out of Stock',
-        },
-      ],
-    },
-    {
-      'category': 'Beverage',
-      'items': [
-        {
-          'name': 'Coke',
-          'price': 1.99,
-          'image': 'https://via.placeholder.com/150',
-          'status': 'Available',
-        },
-        {
-          'name': 'Coffee',
-          'price': 2.49,
-          'image': 'https://via.placeholder.com/150',
-          'status': 'Available',
-        },
-      ],
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
+    // Initialize the controller
+    final FoodAndBeverageController controller = Get.put(FoodAndBeverageController());
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food and Beverages'),
-        backgroundColor: Colors.teal,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: foodAndBeverages.length,
-            itemBuilder: (context, index) {
-              final category = foodAndBeverages[index];
-              return _buildCategorySection(category['category'], category['items']);
-            },
-          ),
+        backgroundColor: Colors.green,
+        title: Row(
+          children: [
+            Flexible(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      // Handle navigation for 'Food'
+                    },
+                    child: const Text(
+                      'Food',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Handle navigation for 'Beverages'
+                    },
+                    child: const Text(
+                      'Beverages',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Handle navigation for 'My List'
+                    },
+                    child: const Text(
+                      'My List',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+      body: Obx(() {
+        // Check loading state
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-  // Helper: Build a category section
-  Widget _buildCategorySection(String category, List items) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            category,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(8.0),
-            itemCount: items.length,
+        // Check if the list is empty
+        if (controller.foodItems.isEmpty) {
+          return const Center(child: Text('No food items available.'));
+        }
+
+        // Display grid of food and beverages
+        return Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: GridView.builder(
+            itemCount: controller.foodItems.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 2,
               childAspectRatio: 0.8,
             ),
             itemBuilder: (context, index) {
-              final item = items[index];
+              final item = controller.foodItems[index];
               return _buildFoodBeverageCard(
-                name: item['name'],
-                price: item['price'],
-                imageUrl: item['image'],
-                status: item['status'],
+                name: item.name, // Use item.name
+                price: item.price, // Use item.price
+                type: item.type, // Use item.price
+                imageUrl: item.image, // Use item.image
+                status: item.status, // Use item.status
               );
             },
           ),
-        ],
-      ),
+        );
+      }),
     );
   }
 
   // Helper: Build a food/beverage card
   Widget _buildFoodBeverageCard({
     required String name,
-    required double price,
+    required String price,
     required String imageUrl,
     required String status,
+    required String type,
   }) {
-    final isAvailable = status == 'Available';
+    final isAvailable = status == 'available';
 
     return Card(
       elevation: 4,
@@ -129,7 +115,7 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
         children: [
           Expanded(
             child: Image.network(
-              imageUrl,
+              Api.ServerName+imageUrl,
               width: double.infinity,
               fit: BoxFit.cover,
             ),
@@ -143,12 +129,27 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
                   name,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text('\$${price.toStringAsFixed(2)}'),
-                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            const SizedBox(height: 1),
+                            Text('${price} Rwf'),
+                            const SizedBox(width: 1),
+                            Text('-${type} Type'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 1),
                 Text(
                   status,
                   style: TextStyle(
@@ -170,9 +171,11 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.green,
             ),
-            child: const Text('Order Now'),
+            child: Text('Order Now', style: TextStyle(
+              color: Colors.white,
+            ),),
           )
               : const Padding(
             padding: EdgeInsets.only(bottom: 8.0),

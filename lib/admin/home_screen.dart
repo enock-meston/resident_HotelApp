@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resident_hotel_app/admin/admin_dashboard_screen.dart';
 import 'package:resident_hotel_app/admin/clent_screen.dart';
+import 'package:resident_hotel_app/admin/food_and_beverages_screen.dart';
 import 'package:resident_hotel_app/admin/room_reservation.dart';
 import 'package:resident_hotel_app/admin/room_screen.dart';
 import 'package:resident_hotel_app/admin/transaction_screen.dart';
@@ -9,7 +10,6 @@ import 'package:resident_hotel_app/admin/user_screen.dart';
 import 'package:resident_hotel_app/controller/users/user_controller.dart';
 import 'package:resident_hotel_app/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? userType;
   String? username;
   String? email;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       email = prefs.getString('email');
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final UserController userController = Get.put(UserController());
@@ -47,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.green,
       ),
       drawer: Drawer(
-        child: Column(
+        child: ListView(  // Use ListView instead of Column for scrolling support
           children: [
             UserAccountsDrawerHeader(
               accountName: Text(
@@ -66,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.green,
                 ),
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.green,
               ),
             ),
@@ -83,28 +85,28 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             if (userType == 'Manager')
               ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('User'),
-              onTap: () {
-                setState(() {
-                  _title = 'User';
-                  _selectedScreen = UserScreen();
-                });
-                Navigator.pop(context);
-              },
-            ),
+                leading: const Icon(Icons.person),
+                title: const Text('User'),
+                onTap: () {
+                  setState(() {
+                    _title = 'User';
+                    _selectedScreen = UserScreen();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
             if (userType == 'Manager')
-            ListTile(
-              leading: const Icon(Icons.room),
-              title: const Text('Rooms'),
-              onTap: () {
-                setState(() {
-                  _title = 'Rooms';
-                  _selectedScreen = RoomScreen();
-                });
-                Navigator.pop(context);
-              },
-            ),
+              ListTile(
+                leading: const Icon(Icons.room),
+                title: const Text('Rooms'),
+                onTap: () {
+                  setState(() {
+                    _title = 'Rooms';
+                    _selectedScreen = RoomScreen();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.person_2),
               title: const Text('Clients'),
@@ -116,6 +118,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pop(context);
               },
             ),
+            if (userType == 'Manager')
+              ListTile(
+                leading: const Icon(Icons.fastfood),
+                title: const Text('Food & Beverages'),
+                onTap: () {
+                  setState(() {
+                    _title = 'Food & Beverages';
+                    _selectedScreen = FoodAndBeveragesScreen();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.book_online),
               title: const Text('Room Reservation'),
@@ -149,10 +163,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pop(context);
               },
             ),
-            const Spacer(),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
               onTap: () {
                 // logout
                 userController.showLogoutConfirmation(context);
