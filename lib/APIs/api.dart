@@ -1,5 +1,5 @@
 class Api{
-  static String ServerIp = "http://192.168.8.111/";
+  static String ServerIp = "http://192.168.1.139/";
   static String ServerName = ServerIp + "resident_hotel_api/";
 
   static String UserRegistration = ServerName+"new_account.php";
@@ -21,4 +21,7 @@ static String viewClient = ServerName+"view_client.php";
 //   food and beverage
 static String save_food_and_beverage = ServerName+"save_food_and_beverage.php";
 static String get_food_and_beverages = ServerName+"get_food_and_beverages.php";
+
+// order food and beverages
+static String orderFood = ServerName+"client/order_food.php";
 }

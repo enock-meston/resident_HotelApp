@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resident_hotel_app/APIs/api.dart';
 import 'package:resident_hotel_app/controller/FoodAndBeverageController.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClientFoodScreen extends StatefulWidget {
   const ClientFoodScreen({super.key});
@@ -11,6 +12,18 @@ class ClientFoodScreen extends StatefulWidget {
 }
 
 class _ClientFoodScreenState extends State<ClientFoodScreen> {
+
+  orderFoodOrBeverage(String Id) async{
+    SharedPreferences sPref =await SharedPreferences.getInstance();
+    var MyId = sPref.getString('clientId');
+    var MyName = sPref.getString('names');
+    print('my Id ${MyId} and ${MyName} and Food Id is ${Id}');
+
+    var Url = Uri.parse(Api.orderFood);
+    
+
+  }
+
   @override
   Widget build(BuildContext context) {
     // Initialize the controller
@@ -87,7 +100,8 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
                 price: item.price, // Use item.price
                 type: item.type, // Use item.price
                 imageUrl: item.image, // Use item.image
-                status: item.status, // Use item.status
+                status: item.status,
+                id: item.id,// Use item.status
               );
             },
           ),
@@ -103,6 +117,7 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
     required String imageUrl,
     required String status,
     required String type,
+    required String id,
   }) {
     final isAvailable = status == 'available';
 
@@ -163,12 +178,16 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
           isAvailable
               ? ElevatedButton(
             onPressed: () {
+              String Fid = id.toString();
+              // _showConfirmationDialog(context);
+              // orderFoodOrBeverage(Fid);
+              _showConfirmationDialog(context, Fid, name);
               // Handle order action
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Ordering $name...'),
-                ),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(
+              //     content: Text('Ordering $name...'),
+              //   ),
+              // );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -189,6 +208,38 @@ class _ClientFoodScreenState extends State<ClientFoodScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showConfirmationDialog(BuildContext context, String Fid, String name) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Order'),
+          content: Text('Are you sure you want to order $name?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                orderFoodOrBeverage(Fid); // Proceed with the order
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Ordering $name...'),
+                  ),
+                );
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
